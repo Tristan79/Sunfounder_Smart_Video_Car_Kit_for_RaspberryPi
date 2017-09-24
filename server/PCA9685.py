@@ -38,7 +38,8 @@ class PWM(object):
     _INVRT              = 0x10
     _OUTDRV             = 0x04
 
-    RPI_REVISION_0 = ["900092"]
+    RPI_REVISION_0    = ["900092"]
+    RPI_REVISION_0_13 = ["900093"]
     RPI_REVISION_1_MODULE_B = ["Beta", "0002", "0003", "0004", "0005", "0006", "000d", "000e", "000f"]
     RPI_REVISION_1_MODULE_A = ["0007", "0008", "0009",]
     RPI_REVISION_1_MODULE_BP = ["0010", "0013"]
@@ -53,6 +54,8 @@ class PWM(object):
         pi_revision = self._get_pi_revision()
         if   pi_revision == '0':
             return 0
+        elif pi_revision == '0 Revision 13':
+            return 1
         elif pi_revision == '1 Module B':
             return 0
         elif pi_revision == '1 Module A':
@@ -77,6 +80,8 @@ class PWM(object):
                 if line.startswith('Revision'):
                     if line[11:-1] in self.RPI_REVISION_0:
                         return '0'
+                    elif line[11:-1] in self.RPI_REVISION_0_13:
+                        return '0 Revision 13'
                     elif line[11:-1] in self.RPI_REVISION_1_MODULE_B:
                         return '1 Module B'
                     elif line[11:-1] in self.RPI_REVISION_1_MODULE_A:
