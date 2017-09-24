@@ -1,19 +1,21 @@
 #!/usr/bin/env python
-import PCA9685 as servo
+import Sunfounder_PWM_Servo_Driver.Servo_init as servo
 import time                  # Import necessary modules
 
 MinPulse = 200
 MaxPulse = 700
 
+FILE_CONFIG = "/home/pi/Sunfounder_Smart_Video_Car_Kit_for_RaspberryPi/server/config"
+
 Current_x = 0
 Current_y = 0
 
-def setup(busnum=None):
+def setup():
 	global Xmin, Ymin, Xmax, Ymax, home_x, home_y, pwm
 	offset_x = 0
 	offset_y = 0
 	try:
-		for line in open('config'):
+		for line in open(FILE_CONFIG):
 			if line[0:8] == 'offset_x':
 				offset_x = int(line[11:-1])
 				#print 'offset_x =', offset_x
@@ -28,11 +30,7 @@ def setup(busnum=None):
 	Ymax = MaxPulse + offset_y
 	home_x = (Xmax + Xmin)/2
 	home_y = Ymin + 80
-	if busnum == None:
-		pwm = servo.PWM()                  # Initialize the servo controller.
-	else:
-		pwm = servo.PWM(bus_number=busnum) # Initialize the servo controller.
-	pwm.frequency = 60
+	pwm = servo.init()           # Initialize the servo controller. 
 
 # ==========================================================================================
 # Control the servo connected to channel 14 of the servo control board to make the camera 
@@ -43,7 +41,7 @@ def move_decrease_x():
 	Current_x += 25
 	if Current_x > Xmax:
 		Current_x = Xmax
-        pwm.write(14, 0, Current_x)   # CH14 <---> X axis
+        pwm.setPWM(14, 0, Current_x)   # CH14 <---> X axis
 # ==========================================================================================
 # Control the servo connected to channel 14 of the servo control board to make the camera 
 # turning towards the negative direction of the x axis.
@@ -53,7 +51,7 @@ def move_increase_x():
 	Current_x -= 25
 	if Current_x <= Xmin:
 		Current_x = Xmin
-        pwm.write(14, 0, Current_x)
+        pwm.setPWM(14, 0, Current_x)
 # ==========================================================================================
 # Control the servo connected to channel 15 of the servo control board to make the camera 
 # turning towards the positive direction of the y axis. 
@@ -63,7 +61,7 @@ def move_increase_y():
 	Current_y += 25
 	if Current_y > Ymax:
 		Current_y = Ymax
-        pwm.write(15, 0, Current_y)   # CH15 <---> Y axis
+        pwm.setPWM(15, 0, Current_y)   # CH15 <---> Y axis
 # ==========================================================================================
 # Control the servo connected to channel 15 of the servo control board to make the camera 
 # turning towards the negative direction of the y axis. 
@@ -73,7 +71,7 @@ def move_decrease_y():
 	Current_y -= 25
 	if Current_y <= Ymin:
 		Current_y = Ymin
-        pwm.write(15, 0, Current_y)
+        pwm.setPWM(15, 0, Current_y)
 # ==========================================================================================		
 # Control the servos connected with channel 14 and 15 at the same time to make the camera 
 # move forward.
@@ -83,12 +81,12 @@ def home_x_y():
 	global Current_x
 	Current_y = home_y 
 	Current_x = home_x
-	pwm.write(14, 0, Current_x)
-	pwm.write(15, 0, Current_y)
+	pwm.setPWM(14, 0, Current_x)
+	pwm.setPWM(15, 0, Current_y)
 
 def calibrate(x,y):
-	pwm.write(14, 0, (MaxPulse+MinPulse)/2+x)
-	pwm.write(15, 0, (MaxPulse+MinPulse)/2+y)
+	pwm.setPWM(14, 0, (MaxPulse+MinPulse)/2+x)
+	pwm.setPWM(15, 0, (MaxPulse+MinPulse)/2+y)
 
 def test():
 	while True:

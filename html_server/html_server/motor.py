@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import RPi.GPIO as GPIO
-import PCA9685 as p
+import Sunfounder_PWM_Servo_Driver.Servo_init as pwm
 import time    # Import necessary modules
 
 # ===========================================================================
@@ -12,6 +12,8 @@ Motor0_B = 12  # pin12
 Motor1_A = 13  # pin13
 Motor1_B = 15  # pin15
 
+FILE_CONFIG = "/home/pi/Sunfounder_Smart_Video_Car_Kit_for_RaspberryPi/server/config"
+
 # ===========================================================================
 # Set channel 4 and 5 of the servo driver IC to generate PWM, thus 
 # controlling the speed of the car
@@ -21,6 +23,8 @@ EN_M1    = 5  # servo driver IC CH5
 
 pins = [Motor0_A, Motor0_B, Motor1_A, Motor1_B]
 
+p = pwm.init()
+
 # ===========================================================================
 # Adjust the duty cycle of the square waves output from channel 4 and 5 of
 # the servo driver IC, so as to control the speed of the car.
@@ -28,24 +32,17 @@ pins = [Motor0_A, Motor0_B, Motor1_A, Motor1_B]
 def setSpeed(speed):
 	speed *= 40
 	print 'speed is: ', speed
-	pwm.write(EN_M0, 0, speed)
-	pwm.write(EN_M1, 0, speed)
+	p.setPWM(EN_M0, 0, speed)
+	p.setPWM(EN_M1, 0, speed)
 
-def setup(busnum=None):
+def setup():
 	global forward0, forward1, backward1, backward0
-	global pwm
-	if busnum == None:
-		pwm = p.PWM()                  # Initialize the servo controller.
-	else:
-		pwm = p.PWM(bus_number=busnum) # Initialize the servo controller.
-
-	pwm.frequency = 60
 	forward0 = 'True'
 	forward1 = 'True'
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BOARD)        # Number GPIOs by its physical location
 	try:
-		for line in open("config"):
+		for line in open(FILE_CONFIG):
 			if line[0:8] == "forward0":
 				forward0 = line[11:-1]
 			if line[0:8] == "forward1":
